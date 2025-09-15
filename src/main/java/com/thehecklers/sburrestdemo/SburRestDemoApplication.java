@@ -1,4 +1,4 @@
-package com.thehecklers.sburrestdemo;
+package com.lanchonete.restapi;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -12,97 +12,99 @@ import java.util.Optional;
 import java.util.UUID;
 
 @SpringBootApplication
-public class SburRestDemoApplication {
+public class LanchoneteRestApiApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SburRestDemoApplication.class, args);
+		SpringApplication.run(LanchoneteRestApiApplication.class, args);
 	}
 
 }
-@CrossOrigin(origins = {"http://localhost:8080","http://127.0.0.1:5500"})
+
+@CrossOrigin(origins = {"http://localhost:8080", "http://127.0.0.1:5500"})
 @RestController
-@RequestMapping("/coffees")
+@RequestMapping("/sanduiches") // Endpoint principal agora é /sanduiches
+class SanduicheApiController {
+	// A lista agora armazena objetos do tipo Sanduiche
+	private final List<Sanduiche> sanduiches = new ArrayList<>();
 
-
-class RestApiDemoController {
-	private List<Coffee> coffees = new ArrayList<>();
-
-	public RestApiDemoController() {
-		coffees.addAll(List.of(
-				new Coffee("Café Cereza"),
-				new Coffee("Café Ganador"),
-				new Coffee("Café Lareño"),
-				new Coffee("Café Três Pontas")
+	public SanduicheApiController() {
+		// Populando a lista com alguns sanduíches iniciais
+		sanduiches.addAll(List.of(
+				new Sanduiche("X-Salada"),
+				new Sanduiche("Misto Quente"),
+				new Sanduiche("Bauru"),
+				new Sanduiche("Frango com Catupiry")
 		));
 	}
 
 	@GetMapping
-	Iterable<Coffee> getCoffees() {
-		return coffees;
+	Iterable<Sanduiche> getSanduiches() {
+		return sanduiches;
 	}
 
 	@GetMapping("/{id}")
-	Optional<Coffee> getCoffeeById(@PathVariable String id) {
-		for (Coffee c: coffees) {
-			if (c.getId().equals(id)) {
-				return Optional.of(c);
+	Optional<Sanduiche> getSanduichePorId(@PathVariable String id) {
+		for (Sanduiche s : sanduiches) {
+			if (s.getId().equals(id)) {
+				return Optional.of(s);
 			}
 		}
-
 		return Optional.empty();
 	}
 
 	@PostMapping
-	Coffee postCoffee(@RequestBody Coffee coffee) {
-		coffees.add(coffee);
-		return coffee;
+	Sanduiche postSanduiche(@RequestBody Sanduiche sanduiche) {
+		sanduiches.add(sanduiche);
+		return sanduiche;
 	}
 
 	@PutMapping("/{id}")
-	ResponseEntity<Coffee> putCoffee(@PathVariable String id,
-									 @RequestBody Coffee coffee) {
-		int coffeeIndex = -1;
+	ResponseEntity<Sanduiche> putSanduiche(@PathVariable String id,
+										   @RequestBody Sanduiche sanduiche) {
+		int sanduicheIndex = -1;
 
-		for (Coffee c: coffees) {
-			if (c.getId().equals(id)) {
-				coffeeIndex = coffees.indexOf(c);
-				coffees.set(coffeeIndex, coffee);
+		for (Sanduiche s : sanduiches) {
+			if (s.getId().equals(id)) {
+				sanduicheIndex = sanduiches.indexOf(s);
+				sanduiches.set(sanduicheIndex, sanduiche);
 			}
 		}
 
-		return (coffeeIndex == -1) ?
-				new ResponseEntity<>(postCoffee(coffee), HttpStatus.CREATED) :
-				new ResponseEntity<>(coffee, HttpStatus.OK);
+		// A lógica de criar um novo se o ID não existir foi mantida
+		return (sanduicheIndex == -1) ?
+				new ResponseEntity<>(postSanduiche(sanduiche), HttpStatus.CREATED) :
+				new ResponseEntity<>(sanduiche, HttpStatus.OK);
 	}
 
 	@DeleteMapping("/{id}")
-	void deleteCoffee(@PathVariable String id) {
-		coffees.removeIf(c -> c.getId().equals(id));
+	void deleteSanduiche(@PathVariable String id) {
+		sanduiches.removeIf(s -> s.getId().equals(id));
 	}
 }
 
-class Coffee {
-	private final String id;
-	private String name;
 
-	public Coffee(String id, String name) {
+class Sanduiche {
+	private final String id;
+	private String nome;
+
+	public Sanduiche(String id, String nome) {
 		this.id = id;
-		this.name = name;
+		this.nome = nome;
 	}
 
-	public Coffee(String name) {
-		this(UUID.randomUUID().toString(), name);
+	public Sanduiche(String nome) {
+		this(UUID.randomUUID().toString(), nome);
 	}
 
 	public String getId() {
 		return id;
 	}
 
-	public String getName() {
-		return name;
+	public String getNome() {
+		return nome;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setNome(String nome) {
+		this.nome = nome;
 	}
 }
